@@ -20,7 +20,9 @@ Players can navigate using typed commands and manage an inventory system.
 
     🛏️ Special rooms (e.g., Sleep Room that heals the player)
 
-    🛠️ Command-based interaction system (like look, inventory, pick up)
+    🛠️ Command-based interaction system (like look, inventory, pick up, and use)
+
+    ❤️ Health system with consumable food and potions
 
     📦 Utility class for modular string-based item management
 
@@ -38,6 +40,8 @@ You begin by entering a room and are prompted with command options. Each action 
 | `go <dir>`  | Move to a new room (where `<dir>` is n/e/s/w)  |
 | `pick up`   | Pick up an item from the room                  |
 | `drop`      | Drop an item from your inventory into the room |
+| `use`       | Choose a health potion or food item to consume |
+| `use <item>`| Consume a named health item directly |
 | `exits`     | Show all available exits from the current room |
 | `help`      | Show help menu with commands                   |
 | `quit`      | Exit the game                                  |
@@ -45,11 +49,17 @@ You begin by entering a room and are prompted with command options. Each action 
 📁 Code Structure
 
 . <br>
-├── CustomPlayer.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Defines the custom player, inventory, and interactions <br>
+├── CustomPlayer.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Defines the custom player, health, inventory, and interactions <br>
+├── HealthItem.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable definition of a healing item <br>
+├── HealthItemCatalog.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Registry of foods and potions that restore health <br>
 ├── GameDemoSimple.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Demo entry point of the game and room setup <br>
 ├── GameVersion2.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Second entry point of the game and room setup <br>
 ├── GameVersion3.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Third entry point of the game and room setup <br>
 ├── GameVersion4.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Fourth entry point of the game and room setup <br>
+├── GameInput.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Shared console input scanner <br>
+├── Attack.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable attack definition shared by player and monster <br>
+├── AttackEffect.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Supported special attack effects <br>
+├── PlayerAttackSet.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Player's available attacks <br>
 ├── MonsterRoom.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Monster Room logic <br>
 ├── Player.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Defines the player, inventory, and interactions <br>
 ├── README.md <br>
@@ -102,15 +112,12 @@ Room Interaction: Each room contains:
 
     3. Run the game
 
-       java GameDemoSimple
+       java GameVersion4
 
 
-📝 Note: The Main.java file should be created to initialize your rooms and player, then loop through rooms until continuePlay is false.
-Different versions of "Main" include: GameDemoSimple.java, GameVersion2.java, GameVersion3.java, and GameVersion4.java.
+📝 Note: `GameVersion4` is the recommended entry point for the current health and inventory features. It uses `CustomPlayer`, starts the player at 50/100 HP, and places a Health Potion in the Kitchen. `GameVersion3` also supports health items. `GameDemoSimple` and `GameVersion2` are earlier examples that still use the basic `Player` class.
 
 🌱 Planned Features
-
-    🧠 Custom player class with health, stamina, or traits
 
     🎲 Random events or item spawns
 

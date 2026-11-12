@@ -14,7 +14,7 @@ public class GameVersion3 {
         gameBoard[1] = new Room("Lab Room", "computer;monitor", 1, "n0");
         gameBoard[2] = new Room("Green Room", "2 big dogs;", 2, "e0;w7;n5");
         
-        gameBoard[3] = new Room("Kitchen", "pizza;milk", 3, "w0;n6");
+        gameBoard[3] = new Room("Kitchen", "pizza;milk;health potion", 3, "w0;n6");
         gameBoard[4] = new Room("Game Room", "giant tv;barking Germany Shephard;2 kids playing", 4, "e6;w5;s0");
         gameBoard[5] = new Room("Den Room", "meowing kitten;", 5, "e4;s2");
         gameBoard[6] = new Room("BedRoom", "bed;office desk;", 6, "w4;s3");
@@ -24,7 +24,7 @@ public class GameVersion3 {
         int playerRoomNumber = 0;
 
         // create player object, using the superclass Player
-        CustomPlayer player = new CustomPlayer("John", playerRoomNumber, "candy bar;steak;coffee", 5);
+        CustomPlayer player = new CustomPlayer("John", playerRoomNumber, "candy bar;steak;coffee", 50, 100);
 
         // play the game, as long as player object has field continuePlay set to true
         while (player.getContinuePlay() == true) {
