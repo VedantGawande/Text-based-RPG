@@ -39,6 +39,7 @@
 - Each `CustomPlayer` owns a `PlayerAttackSet` accessed through `getAttackSet()`.
 - `Attack` is immutable and describes a move; the combat controller is responsible for hit rolls, applying damage, and applying status effects.
 - `PlayerAttackSet.getAttacks()` returns a read-only list view. Add or unlock moves through `addAttack()`.
+- `MonsterRoom.playRoom(CustomPlayer)` now runs a turn-based battle before normal room interaction. The monster has 40 health and deals 8 damage per turn. Players can choose an attack by number or name, or use a health item during their turn. Attack accuracy and damage are honored; poison, stun, and weaken apply for their configured duration. A defeated monster stays defeated while the room instance remains in use.
 
 ## Integration contracts
 

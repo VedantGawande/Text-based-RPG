@@ -24,6 +24,8 @@ Players can navigate using typed commands and manage an inventory system.
 
     ❤️ Health system with consumable food and potions
 
+    ⚔️ Turn-based monster battles with accuracy, status effects, and healing items
+
     📦 Utility class for modular string-based item management
 
 
@@ -45,6 +47,51 @@ You begin by entering a room and are prompted with command options. Each action 
 | `exits`     | Show all available exits from the current room |
 | `help`      | Show help menu with commands                   |
 | `quit`      | Exit the game                                  |
+
+When entering a monster room, choose an attack by its displayed number or name.
+You can also use a healing item with `use <item>` during your turn. Successful
+attacks respect their accuracy and may apply poison, stun, or weaken effects.
+
+### Game Map (GameVersion4)
+
+Each arrow shows a direction you can travel from one room. Some exits are
+one-way.
+
+```mermaid
+flowchart TD
+    r0["0: First Room"]
+    r1["1: Lab Room"]
+    r2["2: Green Room"]
+    r3["3: Kitchen"]
+    r4["4: Game Room"]
+    r5["5: Den Room"]
+    r6["6: BedRoom"]
+    r7["7: Scary Nightmare"]
+    r8["8: Sleep Room"]
+
+    r0 -->|east| r3
+    r0 -->|west| r2
+    r0 -->|south| r1
+    r0 -->|north| r4
+    r1 -->|north| r0
+    r1 -->|south| r8
+    r2 -->|east| r0
+    r2 -->|west| r7
+    r2 -->|north| r5
+    r3 -->|west| r0
+    r3 -->|north| r7
+    r3 -->|south| r6
+    r4 -->|east| r6
+    r4 -->|west| r5
+    r4 -->|south| r0
+    r5 -->|east| r4
+    r5 -->|south| r2
+    r6 -->|west| r4
+    r6 -->|north| r3
+    r7 -->|east| r2
+    r7 -->|south| r3
+    r8 -->|north| r1
+```
 
 📁 Code Structure
 
