@@ -1,9 +1,6 @@
 # Text-Based-RPG
 A short text-based RPG. Explore a mysterious house room by room, collect items, interact with your environment, and navigate through a branching world—all through your command line.
 
-Author: Timothy Johnson <br>
-Date: January 2021 to February 2021
-
 ## Overview
 
 &nbsp;&nbsp;&nbsp;&nbsp;This is a text-based role-playing game (RPG) built in Java that allows players to explore a series of interconnected rooms in a house.
@@ -50,9 +47,11 @@ You begin by entering a room and are prompted with command options. Each action 
 
 When entering a monster room, choose an attack by its displayed number or name.
 You can also use a healing item with `use <item>` during your turn. Successful
-attacks respect their accuracy and may apply poison, stun, or weaken effects.
+attacks respect their accuracy and may apply poison, stun, or weaken effects. The
+monster now also varies its own attacks, using different styles such as claw
+swipes, venom bites, stun slams, and weakening roars.
 
-### Game Map (GameVersion4)
+### Game Map
 
 Each arrow shows a direction you can travel from one room. Some exits are
 one-way.
@@ -99,10 +98,7 @@ flowchart TD
 ├── CustomPlayer.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Defines the custom player, health, inventory, and interactions <br>
 ├── HealthItem.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable definition of a healing item <br>
 ├── HealthItemCatalog.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Registry of foods and potions that restore health <br>
-├── GameDemoSimple.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Demo entry point of the game and room setup <br>
-├── GameVersion2.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Second entry point of the game and room setup <br>
-├── GameVersion3.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Third entry point of the game and room setup <br>
-├── GameVersion4.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Fourth entry point of the game and room setup <br>
+├── GameVersionFinal.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Main entry point of the game and room setup <br>
 ├── GameInput.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Shared console input scanner <br>
 ├── Attack.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable attack definition shared by player and monster <br>
 ├── AttackEffect.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Supported special attack effects <br>
@@ -130,10 +126,6 @@ Room Interaction: Each room contains:
     List of directional exits
 
 
-🖼️ Screenshots / Visuals
-
-![tbrpgbanner](https://github.com/user-attachments/assets/ef1bbb4b-4881-48a2-8718-3f0f0645c5c5)
-
 🧰 Technologies Used
 
     Java 17 (or specify version)
@@ -144,25 +136,8 @@ Room Interaction: Each room contains:
 
     Tokenizer and StringBuilder for parsing and managing state
 
-🚀 Getting Started
-
-    To run this project on your local machine:
-
-    1. Clone this repository
-
-        git clone https://github.com/MrTimmyJ/text-based-rpg-java.git
-        cd text-based-rpg-java
-
-    2. Compile all Java files
-
-       javac *.java
-
-    3. Run the game
-
-       java GameVersion4
 
 
-📝 Note: `GameVersion4` is the recommended entry point for the current health and inventory features. It uses `CustomPlayer`, starts the player at 50/100 HP, and places a Health Potion in the Kitchen. `GameVersion3` also supports health items. `GameDemoSimple` and `GameVersion2` are earlier examples that still use the basic `Player` class.
 
 🌱 Planned Features
 
@@ -175,7 +150,3 @@ Room Interaction: Each room contains:
     🧙 NPC interactions with dialogue options
 
     📜 Quest system with objectives
-
-🪪 License
-
-This open-source project is available under the [MIT License](https://opensource.org/license/mit).
