@@ -1,5 +1,5 @@
 
-public class GameVersion4 {
+public class GameVersionFinal {
 
    public static void main(String args[]) {
    

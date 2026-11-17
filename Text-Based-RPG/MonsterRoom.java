@@ -5,6 +5,15 @@ public class MonsterRoom extends Room {
 
     private static final int MONSTER_MAX_HEALTH = 40;
     private static final int MONSTER_DAMAGE = 8;
+    private static final List<Attack> MONSTER_ATTACKS = List.of(
+            new Attack("Claw Swipe", "The monster slashes with its sharp claws.",
+                    6, 100, AttackEffect.NONE, 0, 0),
+            new Attack("Poison Fang", "The monster bites and leaves venom in the wound.",
+                    5, 90, AttackEffect.POISON, 3, 2),
+            new Attack("Stunning Slam", "The monster crashes into you and tries to stun you.",
+                    8, 80, AttackEffect.STUN, 0, 1),
+            new Attack("Weakening Roar", "The monster lets out a roar that weakens your next strike.",
+                    7, 85, AttackEffect.WEAKEN, 3, 2));
 
     private int monsterHealth = MONSTER_MAX_HEALTH;
     private boolean monsterDefeated;
@@ -167,9 +176,39 @@ public class MonsterRoom extends Room {
             return new int[] {poisonTurns, stunTurns, weakenTurns};
         }
 
-        player.takeDamage(damage);
-        System.out.println("The monster attacks for " + damage + " damage.");
+        Attack monsterAttack = selectMonsterAttack();
+        if (ThreadLocalRandom.current().nextInt(100) < monsterAttack.getAccuracy()) {
+            damage = Math.max(0, monsterAttack.getDamage() - (weakenTurns > 0 ? weakenPower : 0));
+            player.takeDamage(damage);
+            System.out.println(monsterAttack.getDescription());
+            System.out.println("The monster uses " + monsterAttack.getName() + " for " + damage + " damage.");
+            printMonsterEffect(monsterAttack.getEffectType());
+        } else {
+            System.out.println("The monster's " + monsterAttack.getName() + " misses.");
+        }
         return new int[] {poisonTurns, stunTurns, weakenTurns};
+    }
+
+    private Attack selectMonsterAttack() {
+        return MONSTER_ATTACKS.get(ThreadLocalRandom.current().nextInt(MONSTER_ATTACKS.size()));
+    }
+
+    private void printMonsterEffect(AttackEffect effectType) {
+        switch (effectType) {
+            case POISON:
+                System.out.println("You are poisoned by the monster's venom.");
+                break;
+            case STUN:
+                System.out.println("The monster's strike tries to stun you.");
+                break;
+            case WEAKEN:
+                System.out.println("The monster's roar weakens your next attack.");
+                break;
+            case NONE:
+                break;
+            default:
+                throw new IllegalStateException("Unsupported monster attack effect: " + effectType);
+        }
     }
 
     private int findAttackIndex(String command, List<Attack> attacks) {
