@@ -6,7 +6,7 @@
 - `healthPoints` is now an instance field, not a static field. Each `CustomPlayer` owns its own health.
 - `getHealth()`, `getMaxHealth()`, `takeDamage(int)`, `heal(int)`, and `isAlive()` form the health API for the combat and item developers.
 - Damage cannot reduce health below zero. Healing cannot exceed maximum health.
-- The existing four-argument `CustomPlayer` constructor is preserved. It treats the supplied starting health as the maximum health too. When the team decides on a different maximum, use the five-argument constructor, for example `new CustomPlayer("John", 0, "", 50, 100)`.
+- The existing four-argument `CustomPlayer` constructor is preserved. It treats the supplied starting health as the maximum health too. When the team decides on a different maximum, use the five-argument constructor, for example `new CustomPlayer("Player", 0, "", 50, 100)`.
 - `addHealthPoint`, `removeHealthPoint`, `resetHealthPoints`, and `printHealthPoints` are now instance methods with working behavior. The sleep room uses `player.heal(1)`.
 
 

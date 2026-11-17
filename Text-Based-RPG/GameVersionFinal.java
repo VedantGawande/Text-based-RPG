@@ -25,7 +25,7 @@ public class GameVersionFinal {
       int playerRoomNumber = 0;
    
       // create player object, using the superclass Player
-      CustomPlayer player = new CustomPlayer("John", playerRoomNumber, "candy bar;steak;coffee", 50, 100);
+      CustomPlayer player = new CustomPlayer("Player", playerRoomNumber, "candy bar;steak;coffee", 50, 100);
    
       // play the game, as long as player object has field continuePlay set to true
       while (player.getContinuePlay() == true) {
