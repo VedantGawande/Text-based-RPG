@@ -163,3 +163,39 @@ Room Interaction: Each room contains:
 
     📜 Quest system with objectives
 
+
+
+## Graphical User Interface (GUI)
+
+The project includes a Java Swing interface. It uses the same room map, player, inventory, health items, attacks, and monster-battle rules as the console game. The console version remains available.
+
+### Run the GUI
+
+Open a terminal in the `Text-Based-RPG` source folder and run:
+
+```bash
+javac -Xlint:all *.java
+java GameGUI
+```
+
+### Run the console version
+
+```bash
+javac -Xlint:all *.java
+java GameVersionFinal
+```
+
+### GUI controls
+
+- Use the directional buttons to move through available exits.
+- Select an object and click **Pick up selected** to collect it.
+- Select an inventory item and click **Drop selected** to leave it in the current room.
+- Use **Use health item** to consume food or a potion outside combat.
+- In the Sleep Room, click **Rest** to restore one health point.
+- In the Monster Room, choose one of the attack buttons or use a health item during your turn. Movement is locked until the monster is defeated.
+- Use **Restart game** to begin a fresh run.
+
+The GUI uses only Java's built-in Swing library; no external dependency is required.
+
+### Button readability
+Navigation arrows and attack choices use a consistent high-contrast button style. Unavailable directions remain readable but appear muted; navigation is still blocked when a direction is unavailable or while combat is active.

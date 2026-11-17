@@ -99,3 +99,27 @@ Use `GameVersionFinal` as the project entry point.
 - Normal-room commands (`look`, `inventory`, and `quit`) were smoke-tested through `GameVersionFinal`.
 - The Monster Room entry and existing turn-based attack flow were smoke-tested.
 - A structural test verified that `Room` is abstract, all three concrete room types extend it, `HealthItem` implements `Consumable`, and healing through the interface works.
+
+
+## Graphical interface
+- Added `GameGUI.java`, a Swing front end that shares the same game board and player factories as the console entry point.
+- `GameVersionFinal.createGameBoard()` and `createPlayer()` now provide common initialization so the GUI and console versions start with the same room layout and player setup.
+- Added `Room.getAvailableExits()`, `getRoomItems()`, `pickUpItem(...)`, and `dropItem(...)` as UI-friendly model operations. The original console commands continue to call the same operations.
+- Added `Player.getInventoryItems()` to expose a read-only inventory snapshot for display while preserving the existing semicolon-separated storage format.
+- Added `SleepRoom.rest(...)` so the GUI can invoke the same healing behavior without writing console output.
+- Added `CustomPlayer.useHealthItemQuietly(...)` so GUI actions can consume items and display feedback in the in-window adventure log rather than the terminal.
+- Extracted the encounter rules into `MonsterBattle.java`. `MonsterRoom` still owns one persistent battle and the console version still works; the GUI uses `performPlayerAttack(...)` and `useItemDuringBattle(...)` to run the same turn-based rules.
+- The GUI uses Java Swing only. Launch with `java GameGUI`; the original console game remains available with `java GameVersionFinal`.
+- Monster-applied poison, stun, and weaken effects now have corresponding player-side turn behavior in the shared battle engine rather than only being printed as messages.
+
+### GUI verification
+- Compiled every Java source with `javac -Xlint:all *.java`.
+- Ran model smoke tests for room exits, pick-up/drop, quiet health-item use, and monster battle damage.
+- Launched `GameGUI` under a virtual X display and confirmed the window process remained running without startup exceptions.
+- Ran a console smoke test through `GameVersionFinal` to confirm the terminal entry point remains functional.
+
+### GUI button contrast fix
+- Updated the shared `makeButton(...)` factory to use Swing's `BasicButtonUI`, explicit opaque/content-area painting, stronger foreground contrast, a larger bold font, and a visible border. This applies to navigation arrows, attack choices, and the other GUI action buttons.
+- Added a high-contrast inactive navigation style so unavailable directions remain readable.
+- Navigation buttons are visually muted instead of relying on Swing's native disabled-text rendering, which had overridden the custom text color on some look and feels. Each navigation action checks an `rpg.actionEnabled` client property before moving, so directions remain non-functional when there is no exit or while the player is in combat.
+- Verified that attack actions still work and movement remains blocked during combat. Tested the GUI under a virtual X display and inspected screenshots of both the navigation view and the monster battle view.
