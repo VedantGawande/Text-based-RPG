@@ -1,0 +1,163 @@
+@startuml TextBasedRPG
+title Text-Based RPG - Class Diagram
+skinparam classAttributeIconSize 0
+hide empty members
+
+class GameVersionFinal {
+  +main(args: String[]): void
+}
+
+class GameInput <<utility>> {
+  {static} -KEYBOARD: Scanner
+  -GameInput()
+  +{static} readLine(): String
+}
+
+class Utilities <<utility>> {
+  +{static} addToString(item: String, list: String): String
+  +{static} isItemInContainer(item: String, container: String): boolean
+  +{static} removeFromList(item: String, list: String): String
+  +{static} printHelp(): void
+}
+
+class Player {
+  -roomNum: int
+  -name: String
+  -playerInventory: String
+  -continuePlay: boolean
+  +Player(name: String, room: int, inventory: String)
+  +getInventory(): String
+  +printInventory(): void
+  +setContinuePlay(continuePlay: boolean): void
+  +getContinuePlay(): boolean
+  +getName(): String
+  +addToInventory(item: String): void
+  +removeFromInventory(item: String): void
+}
+
+class CustomPlayer {
+  -healthPoints: int
+  -maxHealthPoints: int
+  -attackSet: PlayerAttackSet
+  +getHealth(): int
+  +getMaxHealth(): int
+  +takeDamage(damage: int): void
+  +heal(amount: int): void
+  +isAlive(): boolean
+  +getAttackSet(): PlayerAttackSet
+  +useHealthItem(itemName: String): boolean
+  +printInventory(): void
+}
+
+abstract class Room {
+  #roomObjects: String
+  -roomName: String
+  -roomExits: String
+  -roomNum: int
+  +playRoom(player: CustomPlayer): int
+  +playRoom(player: Player): int
+  +getNextRoom(player: Player): int
+  #userUsesItem(player: Player): void
+  #userPicksUp(player: Player): void
+  #userDrops(player: Player): void
+  +leaveRoom(command: String): int
+  +printObjectsInRoom(): void
+  +printListOfExits(): void
+}
+
+class StandardRoom {
+  +playRoom(player: CustomPlayer): int
+}
+
+class MonsterRoom {
+  {static} -MONSTER_MAX_HEALTH: int
+  {static} -MONSTER_DAMAGE: int
+  -monsterHealth: int
+  -monsterDefeated: boolean
+  +playRoom(player: CustomPlayer): int
+  -playBattle(player: CustomPlayer): void
+  -selectMonsterAttack(): Attack
+}
+
+class SleepRoom {
+  +playRoom(player: CustomPlayer): int
+  +sleepOnStraw(player: CustomPlayer): void
+  +{static} printHelp(): void
+}
+
+class PlayerAttackSet {
+  -attacks: List<Attack>
+  +getAttacks(): List<Attack>
+  +getAttack(index: int): Attack
+  +size(): int
+  +addAttack(attack: Attack): void
+}
+
+class Attack {
+  -name: String
+  -description: String
+  -damage: int
+  -accuracy: int
+  -effectType: AttackEffect
+  -effectPower: int
+  -effectDuration: int
+  +getName(): String
+  +getDescription(): String
+  +getDamage(): int
+  +getAccuracy(): int
+  +getEffectType(): AttackEffect
+  +getEffectPower(): int
+  +getEffectDuration(): int
+}
+
+enum AttackEffect {
+  NONE
+  STUN
+  POISON
+  WEAKEN
+}
+
+interface Consumable {
+  +getName(): String
+  +getDescription(): String
+  +consume(player: CustomPlayer): boolean
+}
+
+class HealthItem {
+  -name: String
+  -description: String
+  -healingAmount: int
+  +getName(): String
+  +getDescription(): String
+  +getHealingAmount(): int
+  +consume(player: CustomPlayer): boolean
+}
+
+class HealthItemCatalog <<utility>> {
+  {static} -ITEMS: Map<String, HealthItem>
+  -HealthItemCatalog()
+  +{static} register(item: HealthItem, aliases: String[]): void
+  +{static} find(itemName: String): HealthItem
+  +{static} getAll(): Collection<HealthItem>
+}
+
+CustomPlayer --|> Player
+StandardRoom --|> Room
+MonsterRoom --|> Room
+SleepRoom --|> Room
+HealthItem ..|> Consumable
+
+CustomPlayer *-- "1" PlayerAttackSet : owns
+PlayerAttackSet *-- "0..*" Attack : attacks
+Attack --> AttackEffect : effect type
+HealthItemCatalog o-- "0..*" HealthItem : registers
+
+GameVersionFinal ..> Room : creates Room[]
+GameVersionFinal ..> CustomPlayer : creates
+MonsterRoom ..> Attack : uses
+Room ..> GameInput : reads commands
+Room ..> Utilities : inventory / help
+CustomPlayer ..> HealthItemCatalog : looks up items
+SleepRoom ..> CustomPlayer : restores health
+
+@enduml

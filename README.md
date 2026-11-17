@@ -1,11 +1,23 @@
 # Text-Based-RPG
-A short text-based RPG. Explore a mysterious house room by room, collect items, interact with your environment, and navigate through a branching world—all through your command line.
+A short Java RPG with a Swing GUI. Explore a mysterious house room by room, collect items, interact with your environment, and navigate through a branching world.
 
 ## Overview
 
-&nbsp;&nbsp;&nbsp;&nbsp;This is a text-based role-playing game (RPG) built in Java that allows players to explore a series of interconnected rooms in a house.
+&nbsp;&nbsp;&nbsp;&nbsp;This is a role-playing game (RPG) built in Java that allows players to explore a series of interconnected rooms in a house.
 Each room contains items that can be picked up or dropped, and rooms may have unique mechanics (such as healing).
-Players can navigate using typed commands and manage an inventory system.
+Players can navigate with GUI buttons or enter commands in the game window.
+
+## Run the game
+
+From PowerShell, in the `Text-Based-RPG` source directory:
+
+```powershell
+$sources = Get-ChildItem -Filter '*.java' | ForEach-Object { $_.Name }
+javac $sources
+java GameVersionFinal
+```
+
+The window provides buttons for room actions and movement, plus a command field for item names and other commands. During combat, choose an attack from the combat buttons or enter its name; type `use <item>` to heal during your turn. In a room, use **Pick up**, **Drop**, or **Use item** and then enter the requested item name in the command field.
 
 🧩 Features
 
@@ -28,7 +40,7 @@ Players can navigate using typed commands and manage an inventory system.
 
 🎮 Gameplay
 
-You begin by entering a room and are prompted with command options. Each action affects the game's state.
+The game displays room descriptions and action results in the window. Use the buttons or type commands into the command field.
 
 ### Available Commands:
 
@@ -99,7 +111,7 @@ flowchart TD
 ├── HealthItem.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable definition of a healing item <br>
 ├── HealthItemCatalog.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Registry of foods and potions that restore health <br>
 ├── GameVersionFinal.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Main entry point of the game and room setup <br>
-├── GameInput.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Shared console input scanner <br>
+├── GameInput.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Shared game input bridge <br>
 ├── Attack.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable attack definition shared by player and monster <br>
 ├── AttackEffect.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Supported special attack effects <br>
 ├── PlayerAttackSet.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Player's available attacks <br>
@@ -127,7 +139,7 @@ Room Interaction: Each room contains:
 
     Java 17 (or specify version)
 
-    Command Line Interface (CLI)
+    Swing GUI
 
     OOP Principles (Encapsulation, Inheritance via CustomPlayer, etc.)
 

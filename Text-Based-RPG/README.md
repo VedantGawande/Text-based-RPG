@@ -1,11 +1,23 @@
 # Text-Based-RPG
-A short text-based RPG. Explore a mysterious house room by room, collect items, interact with your environment, and navigate through a branching world—all through your command line.
+A short Java RPG. Explore a mysterious house room by room, collect items, interact with your environment, and navigate through a branching world in the Swing GUI.
 
 ## Overview
 
 &nbsp;&nbsp;&nbsp;&nbsp;This is a text-based role-playing game (RPG) built in Java that allows players to explore a series of interconnected rooms in a house.
 Each room contains items that can be picked up or dropped, and rooms may have unique mechanics (such as healing).
-Players can navigate using typed commands and manage an inventory system.
+Players can navigate with GUI buttons or enter commands in the game window.
+
+## Run the game
+
+From PowerShell in this directory, compile and launch the GUI:
+
+```powershell
+$sources = Get-ChildItem -Filter '*.java' | ForEach-Object { $_.Name }
+javac $sources
+java GameVersionFinal
+```
+
+The window provides buttons for room actions and movement, plus a command field for item names and other commands. During combat, choose an attack from the combat buttons or enter its name; type `use <item>` to heal during your turn. In a room, use **Pick up**, **Drop**, or **Use item** and then enter the requested item name in the command field.
 
 🧩 Features
 
@@ -28,7 +40,7 @@ Players can navigate using typed commands and manage an inventory system.
 
 🎮 Gameplay
 
-You begin by entering a room and are prompted with command options. Each action affects the game's state.
+The game displays room descriptions and action results in the window. Use the buttons or type commands into the command field.
 
 ### Available Commands:
 
@@ -102,7 +114,7 @@ flowchart TD
 - `Player.java` and `CustomPlayer.java` — player, inventory, health, and attack set
 - `Attack.java`, `AttackEffect.java`, `PlayerAttackSet.java` — player attack definitions
 - `Consumable.java`, `HealthItem.java`, `HealthItemCatalog.java` — health item contract and registry
-- `GameInput.java` — shared console input
+- `GameInput.java` — shared game input bridge
 - `Utilities.java` — inventory and command helpers
 
 
@@ -138,7 +150,7 @@ Room Interaction: Each room contains:
 
     Java 17 (or specify version)
 
-    Command Line Interface (CLI)
+    Swing GUI
 
     OOP Principles (Encapsulation, Inheritance via CustomPlayer, etc.)
 

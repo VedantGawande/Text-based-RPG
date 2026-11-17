@@ -1,8 +1,11 @@
 
 public class GameVersionFinal {
 
-   public static void main(String args[]) {
-   
+   public static void main(String[] args) {
+      GameWindow.launch(GameVersionFinal::playGame);
+   }
+
+   private static void playGame() {
       // designate how many rooms are in the game
       final int NUM_ROOMS = 9;
    
