@@ -108,9 +108,6 @@ flowchart TD
 ├── README.md <br>
 ├── Room.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Generic room logic, including navigation and item handling <br>
 ├── SleepRoom.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Sleep room logic to allow player to heal <br>
-├── SubClass.java <br>
-├── SuperClass.java <br>
-├── Trying.java <br>
 ├── Utilities.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Helper methods for string manipulation and command reference <br>
 
 
