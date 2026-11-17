@@ -61,14 +61,23 @@ public class SleepRoom extends Room {
         return newRoomNum;
     }
 
-    /** Restores one health point, up to the player's maximum health. */
+    /** Restores one health point and returns the amount actually restored. */
+    public int rest(CustomPlayer player) {
+        if (player == null || !player.isAlive()) {
+            return 0;
+        }
+        int before = player.getHealth();
+        player.heal(1);
+        return player.getHealth() - before;
+    }
+
+    /** Console presentation of the shared rest action. */
     public void sleepOnStraw(CustomPlayer player) {
         System.out.println("Ah. Good idea! Before you lay down...");
         System.out.println(player.printHealthPoints());
-
-        player.heal(1);
-
+        int restored = rest(player);
         System.out.println("You wake after 3 hours, and then...");
+        System.out.println("You restored " + restored + " health point(s).");
         System.out.println(player.printHealthPoints());
     }
 

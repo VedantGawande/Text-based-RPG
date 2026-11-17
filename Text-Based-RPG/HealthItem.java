@@ -2,7 +2,7 @@
  * Immutable definition of an item that restores player health when consumed.
  * This class describes the item only; CustomPlayer handles using it.
  */
-public final class HealthItem {
+public final class HealthItem implements Consumable {
 
     private final String name;
     private final String description;
@@ -21,15 +21,29 @@ public final class HealthItem {
         this.healingAmount = healingAmount;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
     public int getHealingAmount() {
         return healingAmount;
+    }
+
+    /** Applies this health item's effect without managing inventory removal. */
+    @Override
+    public boolean consume(CustomPlayer player) {
+        if (player == null || !player.isAlive()
+                || player.getHealth() >= player.getMaxHealth()) {
+            return false;
+        }
+
+        player.heal(healingAmount);
+        return true;
     }
 }

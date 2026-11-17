@@ -27,7 +27,7 @@
 
 ### Related correctness fixes
 - `MonsterRoom` now overrides `playRoom(CustomPlayer)`. This matters because `GameVersionFinal` passes a `CustomPlayer` through a `Room[]`; the old `playRoom(Player)` overload was not selected in that situation.
-- The monster room's `CustomPlayer` overload is a placeholder for the combat controller; it currently retains normal room interaction and does not start a fight yet.
+- `MonsterRoom.playRoom(CustomPlayer)` starts the existing turn-based monster battle before returning to normal room interaction after victory.
 - `Utilities.removeFromList` removes only the first matching inventory item, so duplicate items can be held and used individually.
 - Item list appending avoids adding an unnecessary separator when the list is empty or already ends in `;`.
 - Room exit parsing handles malformed entries more safely.
@@ -78,3 +78,48 @@ Use `GameVersionFinal` as the project entry point.
 - Smoke tests verified independent player health, damage/healing bounds, death state, health reset, duplicate-item removal, access to the four default player attacks, read-only attack listing, and the `MonsterRoom.playRoom(CustomPlayer)` overload.
 - Health-item tests verified successful use of food and potion items, health capping at maximum, item consumption, case-insensitive item names, duplicate item handling, refusal to consume at full health, and refusal to use non-health inventory objects.
 - The source tree contains exactly one `new Scanner(System.in)`, in `GameInput.java`.
+
+
+## OOP requirements: abstract class and interface
+
+### Abstract class — `Room`
+- `Room` is now declared `abstract` and declares `playRoom(CustomPlayer)` as an abstract method.
+- Shared state and common room behavior remain in `Room`: room name/number/exits, objects, navigation, inventory actions, and the normal command loop.
+- Added `StandardRoom`, which implements `playRoom(CustomPlayer)` by delegating to `getNextRoom(player)`.
+- `MonsterRoom` and `SleepRoom` already provide their own `playRoom(CustomPlayer)` implementations and continue to extend `Room`.
+- `GameVersionFinal` still stores rooms in a `Room[]`, but ordinary rooms are now instantiated as `StandardRoom`. The room array and method call use polymorphism to dispatch to the correct room implementation.
+
+### Interface — `Consumable`
+- Added `Consumable`, which defines `getName()`, `getDescription()`, and `consume(CustomPlayer)`.
+- `HealthItem` implements `Consumable`; its `consume` method applies the item's healing effect through `CustomPlayer.heal()` and reports whether it could be consumed.
+- `CustomPlayer.useHealthItem` now refers to the found item through the `Consumable` interface when applying the effect. Inventory ownership checks, full-health/dead-player checks, inventory removal, and messages remain in `CustomPlayer`.
+- This keeps the current food and potion behavior while allowing future consumable item classes to implement the same interface.
+
+### Behavior-preservation checks
+- Normal-room commands (`look`, `inventory`, and `quit`) were smoke-tested through `GameVersionFinal`.
+- The Monster Room entry and existing turn-based attack flow were smoke-tested.
+- A structural test verified that `Room` is abstract, all three concrete room types extend it, `HealthItem` implements `Consumable`, and healing through the interface works.
+
+
+## Graphical interface
+- Added `GameGUI.java`, a Swing front end that shares the same game board and player factories as the console entry point.
+- `GameVersionFinal.createGameBoard()` and `createPlayer()` now provide common initialization so the GUI and console versions start with the same room layout and player setup.
+- Added `Room.getAvailableExits()`, `getRoomItems()`, `pickUpItem(...)`, and `dropItem(...)` as UI-friendly model operations. The original console commands continue to call the same operations.
+- Added `Player.getInventoryItems()` to expose a read-only inventory snapshot for display while preserving the existing semicolon-separated storage format.
+- Added `SleepRoom.rest(...)` so the GUI can invoke the same healing behavior without writing console output.
+- Added `CustomPlayer.useHealthItemQuietly(...)` so GUI actions can consume items and display feedback in the in-window adventure log rather than the terminal.
+- Extracted the encounter rules into `MonsterBattle.java`. `MonsterRoom` still owns one persistent battle and the console version still works; the GUI uses `performPlayerAttack(...)` and `useItemDuringBattle(...)` to run the same turn-based rules.
+- The GUI uses Java Swing only. Launch with `java GameGUI`; the original console game remains available with `java GameVersionFinal`.
+- Monster-applied poison, stun, and weaken effects now have corresponding player-side turn behavior in the shared battle engine rather than only being printed as messages.
+
+### GUI verification
+- Compiled every Java source with `javac -Xlint:all *.java`.
+- Ran model smoke tests for room exits, pick-up/drop, quiet health-item use, and monster battle damage.
+- Launched `GameGUI` under a virtual X display and confirmed the window process remained running without startup exceptions.
+- Ran a console smoke test through `GameVersionFinal` to confirm the terminal entry point remains functional.
+
+### GUI button contrast fix
+- Updated the shared `makeButton(...)` factory to use Swing's `BasicButtonUI`, explicit opaque/content-area painting, stronger foreground contrast, a larger bold font, and a visible border. This applies to navigation arrows, attack choices, and the other GUI action buttons.
+- Added a high-contrast inactive navigation style so unavailable directions remain readable.
+- Navigation buttons are visually muted instead of relying on Swing's native disabled-text rendering, which had overridden the custom text color on some look and feels. Each navigation action checks an `rpg.actionEnabled` client property before moving, so directions remain non-functional when there is no exit or while the player is in combat.
+- Verified that attack actions still work and movement remains blocked during combat. Tested the GUI under a virtual X display and inspected screenshots of both the navigation view and the monster battle view.

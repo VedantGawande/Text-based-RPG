@@ -1,22 +1,9 @@
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
+/** A room that starts and owns one persistent monster encounter. */
 public class MonsterRoom extends Room {
 
-    private static final int MONSTER_MAX_HEALTH = 40;
-    private static final int MONSTER_DAMAGE = 8;
-    private static final List<Attack> MONSTER_ATTACKS = List.of(
-            new Attack("Claw Swipe", "The monster slashes with its sharp claws.",
-                    6, 100, AttackEffect.NONE, 0, 0),
-            new Attack("Poison Fang", "The monster bites and leaves venom in the wound.",
-                    5, 90, AttackEffect.POISON, 3, 2),
-            new Attack("Stunning Slam", "The monster crashes into you and tries to stun you.",
-                    8, 80, AttackEffect.STUN, 0, 1),
-            new Attack("Weakening Roar", "The monster lets out a roar that weakens your next strike.",
-                    7, 85, AttackEffect.WEAKEN, 3, 2));
-
-    private int monsterHealth = MONSTER_MAX_HEALTH;
-    private boolean monsterDefeated;
+    private final MonsterBattle battle = new MonsterBattle();
 
     public MonsterRoom(String roomName, String objects, int roomNum, String listOfExits) {
         super(roomName, objects, roomNum, listOfExits);
@@ -24,7 +11,7 @@ public class MonsterRoom extends Room {
 
     @Override
     public int playRoom(CustomPlayer player) {
-        if (!monsterDefeated) {
+        if (!battle.isDefeated()) {
             if (!player.isAlive()) {
                 System.out.println("You are too weak to fight.");
                 player.setContinuePlay(false);
@@ -39,26 +26,49 @@ public class MonsterRoom extends Room {
         return getNextRoom(player);
     }
 
+    /** Retained for compatibility with code holding only a Player reference. */
     @Override
     public int playRoom(Player player) {
         return getNextRoom(player);
     }
 
+    public int getMonsterHealth() {
+        return battle.getMonsterHealth();
+    }
+
+    public int getMonsterMaxHealth() {
+        return battle.getMonsterMaxHealth();
+    }
+
+    public boolean isMonsterDefeated() {
+        return battle.isDefeated();
+    }
+
+    /** Used by the GUI and any future interface to resolve a player move. */
+    public List<String> performPlayerAttack(CustomPlayer player, int attackIndex) {
+        if (attackIndex < 0 || attackIndex >= player.getAttackSet().size()) {
+            return List.of("Choose a valid attack.");
+        }
+        return battle.playerAttack(player, player.getAttackSet().getAttack(attackIndex));
+    }
+
+    /** Used by the GUI and CLI battle to consume a healing item during combat. */
+    public List<String> useItemDuringBattle(CustomPlayer player, String itemName) {
+        return battle.useHealthItem(player, itemName);
+    }
+
     private void playBattle(CustomPlayer player) {
-        int poisonDamage = 0;
-        int poisonTurns = 0;
-        int stunTurns = 0;
-        int weakenPower = 0;
-        int weakenTurns = 0;
-        List<Attack> attacks = player.getAttackSet().getAttacks();
-
         System.out.println("A monster blocks your way!");
-        System.out.println("Monster health: " + monsterHealth + "/" + MONSTER_MAX_HEALTH);
+        System.out.println("Monster health: " + battle.getMonsterHealth()
+                + "/" + battle.getMonsterMaxHealth());
 
-        while (player.isAlive() && monsterHealth > 0 && player.getContinuePlay()) {
+        while (player.isAlive() && !battle.isDefeated() && player.getContinuePlay()) {
             System.out.println();
             System.out.println(player.printHealthPoints());
-            System.out.println("Monster health: " + monsterHealth + "/" + MONSTER_MAX_HEALTH);
+            System.out.println("Monster health: " + battle.getMonsterHealth()
+                    + "/" + battle.getMonsterMaxHealth());
+
+            List<Attack> attacks = player.getAttackSet().getAttacks();
             for (int i = 0; i < attacks.size(); i++) {
                 Attack attack = attacks.get(i);
                 System.out.println("  " + (i + 1) + ". " + attack.getName()
@@ -72,8 +82,8 @@ public class MonsterRoom extends Room {
                 player.setContinuePlay(false);
                 break;
             }
-
             command = command.trim();
+
             if (command.equalsIgnoreCase("quit")) {
                 player.setContinuePlay(false);
                 break;
@@ -83,14 +93,7 @@ public class MonsterRoom extends Room {
                 continue;
             }
             if (command.regionMatches(true, 0, "use ", 0, 4)) {
-                if (player.useHealthItem(command.substring(4))) {
-                    int[] statuses = takeMonsterTurn(
-                            player, poisonDamage, poisonTurns, stunTurns,
-                            weakenPower, weakenTurns);
-                    poisonTurns = statuses[0];
-                    stunTurns = statuses[1];
-                    weakenTurns = statuses[2];
-                }
+                printEvents(useItemDuringBattle(player, command.substring(4)));
                 continue;
             }
             if (command.equalsIgnoreCase("use")) {
@@ -103,111 +106,17 @@ public class MonsterRoom extends Room {
                 System.out.println("Choose a valid attack number or name.");
                 continue;
             }
-
-            Attack attack = attacks.get(attackIndex);
-            if (ThreadLocalRandom.current().nextInt(100) < attack.getAccuracy()) {
-                monsterHealth = Math.max(0, monsterHealth - attack.getDamage());
-                System.out.println("Your " + attack.getName() + " hits for "
-                        + attack.getDamage() + " damage.");
-                if (monsterHealth > 0) {
-                    switch (attack.getEffectType()) {
-                        case POISON:
-                            poisonDamage = attack.getEffectPower();
-                            poisonTurns = attack.getEffectDuration();
-                            System.out.println("The monster is poisoned.");
-                            break;
-                        case STUN:
-                            stunTurns = attack.getEffectDuration();
-                            System.out.println("The monster is stunned.");
-                            break;
-                        case WEAKEN:
-                            weakenPower = attack.getEffectPower();
-                            weakenTurns = attack.getEffectDuration();
-                            System.out.println("The monster is weakened.");
-                            break;
-                        case NONE:
-                            break;
-                        default:
-                            throw new IllegalStateException(
-                                    "Unsupported attack effect: " + attack.getEffectType());
-                    }
-                }
-            } else {
-                System.out.println("Your " + attack.getName() + " misses.");
-            }
-
-            if (monsterHealth > 0) {
-                int[] statuses = takeMonsterTurn(
-                        player, poisonDamage, poisonTurns, stunTurns,
-                        weakenPower, weakenTurns);
-                poisonTurns = statuses[0];
-                stunTurns = statuses[1];
-                weakenTurns = statuses[2];
-            }
+            printEvents(performPlayerAttack(player, attackIndex));
         }
 
-        if (monsterHealth <= 0) {
-            monsterDefeated = true;
-            System.out.println("You defeated the monster!");
-        } else if (!player.isAlive()) {
-            System.out.println("You have been defeated.");
+        if (!player.isAlive()) {
             player.setContinuePlay(false);
         }
     }
 
-    private int[] takeMonsterTurn(CustomPlayer player, int poisonDamage, int poisonTurns,
-                                  int stunTurns, int weakenPower, int weakenTurns) {
-        if (poisonTurns > 0) {
-            monsterHealth = Math.max(0, monsterHealth - poisonDamage);
-            poisonTurns--;
-            System.out.println("Poison deals " + poisonDamage + " damage to the monster.");
-        }
-        if (monsterHealth <= 0) {
-            return new int[] {poisonTurns, stunTurns, weakenTurns};
-        }
-
-        int damage = Math.max(0, MONSTER_DAMAGE - (weakenTurns > 0 ? weakenPower : 0));
-        if (weakenTurns > 0) {
-            weakenTurns--;
-        }
-        if (stunTurns > 0) {
-            stunTurns--;
-            System.out.println("The monster is stunned and cannot attack.");
-            return new int[] {poisonTurns, stunTurns, weakenTurns};
-        }
-
-        Attack monsterAttack = selectMonsterAttack();
-        if (ThreadLocalRandom.current().nextInt(100) < monsterAttack.getAccuracy()) {
-            damage = Math.max(0, monsterAttack.getDamage() - (weakenTurns > 0 ? weakenPower : 0));
-            player.takeDamage(damage);
-            System.out.println(monsterAttack.getDescription());
-            System.out.println("The monster uses " + monsterAttack.getName() + " for " + damage + " damage.");
-            printMonsterEffect(monsterAttack.getEffectType());
-        } else {
-            System.out.println("The monster's " + monsterAttack.getName() + " misses.");
-        }
-        return new int[] {poisonTurns, stunTurns, weakenTurns};
-    }
-
-    private Attack selectMonsterAttack() {
-        return MONSTER_ATTACKS.get(ThreadLocalRandom.current().nextInt(MONSTER_ATTACKS.size()));
-    }
-
-    private void printMonsterEffect(AttackEffect effectType) {
-        switch (effectType) {
-            case POISON:
-                System.out.println("You are poisoned by the monster's venom.");
-                break;
-            case STUN:
-                System.out.println("The monster's strike tries to stun you.");
-                break;
-            case WEAKEN:
-                System.out.println("The monster's roar weakens your next attack.");
-                break;
-            case NONE:
-                break;
-            default:
-                throw new IllegalStateException("Unsupported monster attack effect: " + effectType);
+    private void printEvents(List<String> events) {
+        for (String event : events) {
+            System.out.println(event);
         }
     }
 
@@ -225,41 +134,4 @@ public class MonsterRoom extends Room {
         }
     }
 
-    @Override
-    protected void userPicksUp(Player player) {
-        System.out.println("Is there something interesting you'd like to take?");
-        String itemToPickUp = GameInput.readLine();
-        if (itemToPickUp == null) {
-            player.setContinuePlay(false);
-            return;
-        }
-        itemToPickUp = itemToPickUp.trim();
-
-        if (Utilities.isItemInContainer(itemToPickUp, roomObjects)) {
-            player.addToInventory(itemToPickUp);
-            roomObjects = Utilities.removeFromList(itemToPickUp, roomObjects);
-            System.out.println("Item stolen!");
-        } else {
-            System.out.println("Item was not stolen.");
-        }
-    }
-
-    @Override
-    protected void userDrops(Player player) {
-        System.out.println("What item would you like to drop?");
-        String itemToDrop = GameInput.readLine();
-        if (itemToDrop == null) {
-            player.setContinuePlay(false);
-            return;
-        }
-        itemToDrop = itemToDrop.trim();
-
-        if (Utilities.isItemInContainer(itemToDrop, player.getInventory())) {
-            player.removeFromInventory(itemToDrop);
-            roomObjects = Utilities.addToString(itemToDrop, roomObjects);
-            System.out.println("Item dropped.");
-        } else {
-            System.out.println("You do not have that item.");
-        }
-    }
 }

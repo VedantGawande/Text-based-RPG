@@ -94,44 +94,70 @@ public class CustomPlayer extends Player {
      * @return true if an item was successfully consumed
      */
     public boolean useHealthItem(String inventoryItemName) {
+        return useHealthItem(inventoryItemName, true);
+    }
+
+    /** Performs the same inventory/health checks without printing to System.out. */
+    public boolean useHealthItemQuietly(String inventoryItemName) {
+        return useHealthItem(inventoryItemName, false);
+    }
+
+    private boolean useHealthItem(String inventoryItemName, boolean showMessages) {
         if (inventoryItemName == null || inventoryItemName.isBlank()) {
-            System.out.println("Please specify an item to use.");
+            if (showMessages) {
+                System.out.println("Please specify an item to use.");
+            }
             return false;
         }
 
         String itemName = inventoryItemName.trim();
         if (!Utilities.isItemInContainer(itemName, getInventory())) {
-            System.out.println("You do not have " + itemName + " in your inventory.");
+            if (showMessages) {
+                System.out.println("You do not have " + itemName + " in your inventory.");
+            }
             return false;
         }
 
-        HealthItem healthItem = HealthItemCatalog.find(itemName);
+        Consumable healthItem = HealthItemCatalog.find(itemName);
         if (healthItem == null) {
-            System.out.println(itemName + " cannot be consumed to restore health.");
+            if (showMessages) {
+                System.out.println(itemName + " cannot be consumed to restore health.");
+            }
             return false;
         }
 
         if (!isAlive()) {
-            System.out.println("You cannot use an item while you are defeated.");
+            if (showMessages) {
+                System.out.println("You cannot use an item while you are defeated.");
+            }
             return false;
         }
 
         if (healthPoints >= maxHealthPoints) {
-            System.out.println("Your health is already full. Save "
-                    + healthItem.getName() + " for later.");
+            if (showMessages) {
+                System.out.println("Your health is already full. Save "
+                        + healthItem.getName() + " for later.");
+            }
             return false;
         }
 
         int healthBefore = healthPoints;
-        heal(healthItem.getHealingAmount());
+        if (!healthItem.consume(this)) {
+            if (showMessages) {
+                System.out.println("You cannot use " + healthItem.getName() + " right now.");
+            }
+            return false;
+        }
         int actualHealing = healthPoints - healthBefore;
 
         // Consume exactly one copy, and only after healing succeeds.
         removeFromInventory(itemName);
 
-        System.out.println("You used " + healthItem.getName() + " and restored "
-                + actualHealing + " health point(s).");
-        System.out.println(printHealthPoints());
+        if (showMessages) {
+            System.out.println("You used " + healthItem.getName() + " and restored "
+                    + actualHealing + " health point(s).");
+            System.out.println(printHealthPoints());
+        }
         return true;
     }
 

@@ -1,0 +1,106 @@
+@startuml TextBasedRPGSequence
+title Text-Based RPG - Main Gameplay Sequence
+autonumber
+
+actor Player
+participant "GameVersionFinal" as Game
+participant "Room[] gameBoard" as Board
+participant "Current Room\n(StandardRoom / SleepRoom / MonsterRoom)" as Room
+participant "GameInput" as Input
+participant "CustomPlayer" as Character
+participant "Utilities" as Utilities
+participant "HealthItemCatalog" as Catalog
+participant "HealthItem" as HealthItem
+participant "PlayerAttackSet" as AttackSet
+participant "Monster" as Monster
+
+Game -> Board: create and populate rooms
+Game -> Character: new CustomPlayer(...)
+loop while player continues
+  Game -> Board: get room at current room number
+  Board --> Game: current Room
+  Game -> Room: playRoom(Character)
+
+  alt MonsterRoom and monster not defeated
+    Room -> Character: isAlive()
+    Character --> Room: alive
+    loop while player and monster alive
+      Room -> AttackSet: getAttacks()
+      AttackSet --> Room: available attacks
+      Room -> Player: display health, attacks, and prompt
+      Player -> Input: enter attack / inventory / use item / quit
+      Input --> Room: command
+      alt Attack selected
+        Room -> AttackSet: getAttack(index)
+        AttackSet --> Room: Attack
+        Room -> Room: resolve hit and apply damage/effect
+        opt Monster still alive
+          Room -> Monster: take turn
+          Monster -> Character: takeDamage(damage)
+        end
+      else Use health item
+        Room -> Character: useHealthItem(itemName)
+        Character -> Catalog: find(itemName)
+        Catalog --> Character: HealthItem or null
+        opt Item is valid, owned, and usable
+          Character -> HealthItem: consume(Character)
+          HealthItem -> Character: heal(amount)
+          Character -> Character: remove item from inventory
+          opt Player remains in battle
+            Room -> Monster: take turn
+            Monster -> Character: takeDamage(damage)
+          end
+        end
+      else Inventory or quit
+        Room -> Character: printInventory() / setContinuePlay(false)
+      end
+    end
+  end
+
+  opt Player continues and is alive
+    Room -> Player: display room and command prompt
+    Player -> Input: enter exploration command
+    Input --> Room: command
+    alt Look or exits
+      Room -> Room: print room contents or exits
+    else Inventory
+      Room -> Character: printInventory()
+    else Pick up or drop
+      Room -> Player: enter item name
+      Player -> Input: item name
+      Input --> Room: item name
+      Room -> Utilities: check item in room or inventory
+      Utilities --> Room: found / not found
+      opt Item found
+        Room -> Character: update inventory
+        Room -> Room: update room objects
+      end
+    else Use health item
+      Room -> Character: useHealthItem(itemName)
+      Character -> Catalog: find(itemName)
+      Catalog --> Character: HealthItem or null
+      opt Item usable
+        Character -> HealthItem: consume(Character)
+        HealthItem -> Character: heal(amount)
+        Character -> Character: remove item from inventory
+      end
+    else Sleep in SleepRoom
+      Room -> Character: sleepOnStraw(Character)
+      Character -> Character: heal(1)
+    else Go direction
+      Room -> Room: leaveRoom(command)
+      Room --> Game: destination room number
+      Game -> Game: update current room number
+    else Help, invalid command, or quit
+      Room -> Utilities: printHelp()
+      opt Quit
+        Room -> Character: setContinuePlay(false)
+      end
+    end
+  end
+
+  Room --> Game: next room number
+  Game -> Game: update current room number
+end
+Game --> Player: game ends
+@enduml

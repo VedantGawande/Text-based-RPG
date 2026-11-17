@@ -24,6 +24,20 @@ public class Player {
       return playerInventory;
    }
 
+
+   /** Returns an ordered snapshot of inventory entries, preserving duplicates. */
+   public java.util.List<String> getInventoryItems() {
+      java.util.List<String> items = new java.util.ArrayList<>();
+      StringTokenizer tokens = new StringTokenizer(playerInventory == null ? "" : playerInventory, ";");
+      while (tokens.hasMoreTokens()) {
+         String item = tokens.nextToken().trim();
+         if (!item.isEmpty()) {
+            items.add(item);
+         }
+      }
+      return java.util.Collections.unmodifiableList(items);
+   }
+
    // getter function to get listing of inventor
    public void printInventory() {
       StringTokenizer strT = new StringTokenizer(playerInventory, ";");

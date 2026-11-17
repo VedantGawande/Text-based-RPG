@@ -1,5 +1,5 @@
 # Text-Based-RPG
-A Java RPG with both a graphical Swing interface and a console mode. Explore a mysterious house room by room, collect items, interact with your environment, and navigate through a branching world—all through your command line.
+A short text-based RPG. Explore a mysterious house room by room, collect items, interact with your environment, and navigate through a branching world—all through your command line.
 
 ## Overview
 
@@ -94,9 +94,7 @@ flowchart TD
 
 📁 Code Structure
 
-- `GameVersionFinal.java` — console entry point and shared room/player setup
-- `GameGUI.java` — graphical Swing entry point
-- `MonsterBattle.java` — shared turn-based battle rules
+- `GameVersionFinal.java` — main entry point and room setup
 - `Room.java` — abstract base class for all rooms
 - `StandardRoom.java` — ordinary exploration room
 - `MonsterRoom.java` — monster battle room
@@ -119,6 +117,10 @@ Room Interaction: Each room contains:
 
     List of directional exits
 
+
+🖼️ Screenshots / Visuals
+
+![tbrpgbanner](https://github.com/user-attachments/assets/ef1bbb4b-4881-48a2-8718-3f0f0645c5c5)
 
 ## Object-Oriented Design
 
@@ -162,22 +164,23 @@ Room Interaction: Each room contains:
     📜 Quest system with objectives
 
 
-## Graphical User Interface
 
-The project includes a Java Swing GUI as well as the original console version. Both modes use the same room map, player model, inventory, health items, attacks, and monster battle engine.
+## Graphical User Interface (GUI)
 
-### Launch the GUI (recommended)
+The project includes a Java Swing interface. It uses the same room map, player, inventory, health items, attacks, and monster-battle rules as the console game. The console version remains available.
+
+### Run the GUI
 
 Open a terminal in the `Text-Based-RPG` source folder and run:
 
-```powershell
+```bash
 javac -Xlint:all *.java
 java GameGUI
 ```
 
-### Launch the console version
+### Run the console version
 
-```powershell
+```bash
 javac -Xlint:all *.java
 java GameVersionFinal
 ```
@@ -185,11 +188,14 @@ java GameVersionFinal
 ### GUI controls
 
 - Use the directional buttons to move through available exits.
-- Select a room object and choose **Pick up selected** to collect it.
-- Select an inventory entry and choose **Drop selected** to leave it in the current room.
-- Use **Use health item** for food and potions outside combat.
-- In the Sleep Room, choose **Rest** to restore one health point.
-- In the Monster Room, select an attack button or use a health item during your turn. The game locks movement until the monster is defeated.
-- Choose **Restart game** to begin a new run.
+- Select an object and click **Pick up selected** to collect it.
+- Select an inventory item and click **Drop selected** to leave it in the current room.
+- Use **Use health item** to consume food or a potion outside combat.
+- In the Sleep Room, click **Rest** to restore one health point.
+- In the Monster Room, choose one of the attack buttons or use a health item during your turn. Movement is locked until the monster is defeated.
+- Use **Restart game** to begin a fresh run.
 
-The GUI uses only Java's built-in Swing library. No external libraries are needed.
+The GUI uses only Java's built-in Swing library; no external dependency is required.
+
+### Button readability
+Navigation arrows and attack choices use a consistent high-contrast button style. Unavailable directions remain readable but appear muted; navigation is still blocked when a direction is unavailable or while combat is active.

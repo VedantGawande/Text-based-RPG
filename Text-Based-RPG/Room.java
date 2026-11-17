@@ -1,7 +1,18 @@
 import java.util.StringTokenizer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-// The superclass with fields and methods for a generic game room.
-public class Room {
+/**
+ * Abstract base class for every room in the game.
+ *
+ * It stores the data and shared commands common to all rooms. Each concrete
+ * room decides what happens when the player enters it by implementing
+ * playRoom(CustomPlayer).
+ */
+public abstract class Room {
 
     // Protected so specialized rooms can customize their room contents.
     protected String roomObjects;
@@ -9,14 +20,18 @@ public class Room {
     private final String roomExits;
     private final int roomNum;
 
-    public int playRoom(CustomPlayer player) {
-        return getNextRoom(player);
-    }
+    /** Each concrete room defines its own entry behavior. */
+    public abstract int playRoom(CustomPlayer player);
 
+    /**
+     * Backwards-compatible entry point for code that only has a Player
+     * reference. The main game uses CustomPlayer and the abstract method above.
+     */
     public int playRoom(Player player) {
         return getNextRoom(player);
     }
 
+    /** Shared command loop used by ordinary rooms and after special-room events. */
     public int getNextRoom(Player player) {
         System.out.println("You are in the " + roomName);
         System.out.println("What would you like to do?");
@@ -101,11 +116,8 @@ public class Room {
             player.setContinuePlay(false);
             return;
         }
-        itemToPickUp = itemToPickUp.trim();
-
-        if (Utilities.isItemInContainer(itemToPickUp, roomObjects)) {
-            player.addToInventory(itemToPickUp);
-            roomObjects = Utilities.removeFromList(itemToPickUp, roomObjects);
+        if (pickUpItem(player, itemToPickUp)) {
+            System.out.println("Picked up " + itemToPickUp.trim() + ".");
         } else {
             System.out.println("That item is not in the room");
         }
@@ -118,14 +130,46 @@ public class Room {
             player.setContinuePlay(false);
             return;
         }
-        itemToDrop = itemToDrop.trim();
-
-        if (Utilities.isItemInContainer(itemToDrop, player.getInventory())) {
-            player.removeFromInventory(itemToDrop);
-            roomObjects = Utilities.addToString(itemToDrop, roomObjects);
+        if (dropItem(player, itemToDrop)) {
+            System.out.println("Dropped " + itemToDrop.trim() + ".");
         } else {
             System.out.println("You cannot drop something that you don't have");
         }
+    }
+
+    /** Adds one matching room object to the player's inventory. */
+    public boolean pickUpItem(Player player, String itemName) {
+        if (player == null || itemName == null || itemName.isBlank()
+                || !Utilities.isItemInContainer(itemName, roomObjects)) {
+            return false;
+        }
+        player.addToInventory(itemName.trim());
+        roomObjects = Utilities.removeFromList(itemName.trim(), roomObjects);
+        return true;
+    }
+
+    /** Drops one matching inventory entry into this room. */
+    public boolean dropItem(Player player, String itemName) {
+        if (player == null || itemName == null || itemName.isBlank()
+                || !Utilities.isItemInContainer(itemName, player.getInventory())) {
+            return false;
+        }
+        player.removeFromInventory(itemName.trim());
+        roomObjects = Utilities.addToString(itemName.trim(), roomObjects);
+        return true;
+    }
+
+    /** Returns the current room objects as a read-only list. */
+    public List<String> getRoomItems() {
+        List<String> items = new ArrayList<>();
+        StringTokenizer tokens = new StringTokenizer(roomObjects, ";");
+        while (tokens.hasMoreTokens()) {
+            String item = tokens.nextToken().trim();
+            if (!item.isEmpty()) {
+                items.add(item);
+            }
+        }
+        return Collections.unmodifiableList(items);
     }
 
     public Room(String roomName, String objects, int roomNum, String listOfExits) {
@@ -147,6 +191,35 @@ public class Room {
         return roomNum;
     }
 
+    /** Returns available exits as direction-to-room-number pairs for GUI use. */
+    public Map<String, Integer> getAvailableExits() {
+        Map<String, Integer> exits = new LinkedHashMap<>();
+        StringTokenizer tokens = new StringTokenizer(roomExits, ";");
+        while (tokens.hasMoreTokens()) {
+            String exit = tokens.nextToken().trim().toLowerCase();
+            if (exit.length() < 2) {
+                continue;
+            }
+            String direction;
+            switch (exit.charAt(0)) {
+                case 'n': direction = "north"; break;
+                case 'e': direction = "east"; break;
+                case 's': direction = "south"; break;
+                case 'w': direction = "west"; break;
+                default: continue;
+            }
+            try {
+                int destination = Integer.parseInt(exit.substring(1));
+                if (destination >= 0) {
+                    exits.put(direction, destination);
+                }
+            } catch (NumberFormatException ignored) {
+                // Ignore malformed exit entries.
+            }
+        }
+        return Collections.unmodifiableMap(exits);
+    }
+
     public void addToObjects(String item) {
         roomObjects = Utilities.addToString(item, roomObjects);
     }
@@ -160,35 +233,13 @@ public class Room {
             System.out.println("That exit is not available");
             return roomNum;
         }
-
-        char requestedDirection = 0;
-        switch (command) {
-            case "go north": requestedDirection = 'n'; break;
-            case "go east":  requestedDirection = 'e'; break;
-            case "go south": requestedDirection = 's'; break;
-            case "go west":  requestedDirection = 'w'; break;
-            default:
-                System.out.println("That exit is not available");
-                return roomNum;
+        String direction = command.substring(3).trim().toLowerCase();
+        Integer destination = getAvailableExits().get(direction);
+        if (destination == null) {
+            System.out.println("That exit is not available");
+            return roomNum;
         }
-
-        StringTokenizer exitsT = new StringTokenizer(roomExits, ";");
-        while (exitsT.hasMoreTokens()) {
-            String exit = exitsT.nextToken().trim().toLowerCase();
-            if (exit.length() >= 2 && exit.charAt(0) == requestedDirection) {
-                try {
-                    int destination = Integer.parseInt(exit.substring(1));
-                    if (destination >= 0) {
-                        return destination;
-                    }
-                } catch (NumberFormatException ignored) {
-                    // Ignore malformed exit entries and continue checking.
-                }
-            }
-        }
-
-        System.out.println("That exit is not available");
-        return roomNum;
+        return destination;
     }
 
     public void printObjectsInRoom() {
