@@ -94,24 +94,16 @@ flowchart TD
 
 📁 Code Structure
 
-. <br>
-├── CustomPlayer.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Defines the custom player, health, inventory, and interactions <br>
-├── HealthItem.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable definition of a healing item <br>
-├── HealthItemCatalog.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Registry of foods and potions that restore health <br>
-├── GameVersionFinal.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Main entry point of the game and room setup <br>
-├── GameInput.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Shared console input scanner <br>
-├── Attack.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable attack definition shared by player and monster <br>
-├── AttackEffect.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Supported special attack effects <br>
-├── PlayerAttackSet.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Player's available attacks <br>
-├── MonsterRoom.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Monster Room logic <br>
-├── Player.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Defines the player, inventory, and interactions <br>
-├── README.md <br>
-├── Room.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Generic room logic, including navigation and item handling <br>
-├── SleepRoom.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Sleep room logic to allow player to heal <br>
-├── SubClass.java <br>
-├── SuperClass.java <br>
-├── Trying.java <br>
-├── Utilities.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Helper methods for string manipulation and command reference <br>
+- `GameVersionFinal.java` — main entry point and room setup
+- `Room.java` — abstract base class for all rooms
+- `StandardRoom.java` — ordinary exploration room
+- `MonsterRoom.java` — monster battle room
+- `SleepRoom.java` — room with the sleep healing action
+- `Player.java` and `CustomPlayer.java` — player, inventory, health, and attack set
+- `Attack.java`, `AttackEffect.java`, `PlayerAttackSet.java` — player attack definitions
+- `Consumable.java`, `HealthItem.java`, `HealthItemCatalog.java` — health item contract and registry
+- `GameInput.java` — shared console input
+- `Utilities.java` — inventory and command helpers
 
 
 ⚙️ How It Works <br>
@@ -126,9 +118,21 @@ Room Interaction: Each room contains:
     List of directional exits
 
 
-🖼️ Screenshots / Visuals
+## Object-Oriented Design
 
-![tbrpgbanner](https://github.com/user-attachments/assets/ef1bbb4b-4881-48a2-8718-3f0f0645c5c5)
+### Abstract class: `Room`
+
+`Room` is an abstract base class. It contains shared room data and reusable behavior such as navigation, displaying objects, picking up and dropping items, and the common room command loop. It declares `playRoom(CustomPlayer)` as abstract, because every concrete room must decide what happens when the player enters it.
+
+- `StandardRoom` implements the normal exploration behavior by calling the shared room command loop.
+- `MonsterRoom` implements the monster encounter and then returns to normal room interaction.
+- `SleepRoom` implements the sleep action as well as the normal room commands.
+
+`GameVersionFinal` stores these different room objects in a `Room[]`. Calling `playRoom(player)` therefore uses polymorphism to run the behavior of the actual room object.
+
+### Interface: `Consumable`
+
+`Consumable` defines the common contract for an inventory item that can be consumed by a `CustomPlayer`. `HealthItem` implements this interface and applies its healing effect through `consume(player)`. `CustomPlayer` uses the interface instead of depending directly on the implementation when applying an item's effect. This allows another consumable type to implement the same contract later.
 
 🧰 Technologies Used
 
@@ -154,4 +158,3 @@ Room Interaction: Each room contains:
     🧙 NPC interactions with dialogue options
 
     📜 Quest system with objectives
-
