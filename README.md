@@ -1,23 +1,11 @@
 # Text-Based-RPG
-A short Java RPG with a Swing GUI. Explore a mysterious house room by room, collect items, interact with your environment, and navigate through a branching world.
+A short text-based RPG. Explore a mysterious house room by room, collect items, interact with your environment, and navigate through a branching world—all through your command line.
 
 ## Overview
 
-&nbsp;&nbsp;&nbsp;&nbsp;This is a role-playing game (RPG) built in Java that allows players to explore a series of interconnected rooms in a house.
+&nbsp;&nbsp;&nbsp;&nbsp;This is a text-based role-playing game (RPG) built in Java that allows players to explore a series of interconnected rooms in a house.
 Each room contains items that can be picked up or dropped, and rooms may have unique mechanics (such as healing).
-Players can navigate with GUI buttons or enter commands in the game window.
-
-## Run the game
-
-From PowerShell, in the `Text-Based-RPG` source directory:
-
-```powershell
-$sources = Get-ChildItem -Filter '*.java' | ForEach-Object { $_.Name }
-javac $sources
-java GameVersionFinal
-```
-
-The window provides buttons for room actions and movement, plus a command field for item names and other commands. During combat, choose an attack from the combat buttons or enter its name; type `use <item>` to heal during your turn. In a room, use **Pick up**, **Drop**, or **Use item** and then enter the requested item name in the command field.
+Players can navigate using typed commands and manage an inventory system.
 
 🧩 Features
 
@@ -40,7 +28,7 @@ The window provides buttons for room actions and movement, plus a command field 
 
 🎮 Gameplay
 
-The game displays room descriptions and action results in the window. Use the buttons or type commands into the command field.
+You begin by entering a room and are prompted with command options. Each action affects the game's state.
 
 ### Available Commands:
 
@@ -106,21 +94,16 @@ flowchart TD
 
 📁 Code Structure
 
-. <br>
-├── CustomPlayer.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Defines the custom player, health, inventory, and interactions <br>
-├── HealthItem.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable definition of a healing item <br>
-├── HealthItemCatalog.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Registry of foods and potions that restore health <br>
-├── GameVersionFinal.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Main entry point of the game and room setup <br>
-├── GameInput.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Shared game input bridge <br>
-├── Attack.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Immutable attack definition shared by player and monster <br>
-├── AttackEffect.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Supported special attack effects <br>
-├── PlayerAttackSet.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Player's available attacks <br>
-├── MonsterRoom.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Monster Room logic <br>
-├── Player.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Defines the player, inventory, and interactions <br>
-├── README.md <br>
-├── Room.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Generic room logic, including navigation and item handling <br>
-├── SleepRoom.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Sleep room logic to allow player to heal <br>
-├── Utilities.java &nbsp;&nbsp;&nbsp;---&nbsp;&nbsp;&nbsp; Helper methods for string manipulation and command reference <br>
+- `GameVersionFinal.java` — main entry point and room setup
+- `Room.java` — abstract base class for all rooms
+- `StandardRoom.java` — ordinary exploration room
+- `MonsterRoom.java` — monster battle room
+- `SleepRoom.java` — room with the sleep healing action
+- `Player.java` and `CustomPlayer.java` — player, inventory, health, and attack set
+- `Attack.java`, `AttackEffect.java`, `PlayerAttackSet.java` — player attack definitions
+- `Consumable.java`, `HealthItem.java`, `HealthItemCatalog.java` — health item contract and registry
+- `GameInput.java` — shared console input
+- `Utilities.java` — inventory and command helpers
 
 
 ⚙️ How It Works <br>
@@ -135,11 +118,31 @@ Room Interaction: Each room contains:
     List of directional exits
 
 
+🖼️ Screenshots / Visuals
+
+![Game Execution GUI Screenshot](Exectuion_output.png)
+
+## Object-Oriented Design
+
+### Abstract class: `Room`
+
+`Room` is an abstract base class. It contains shared room data and reusable behavior such as navigation, displaying objects, picking up and dropping items, and the common room command loop. It declares `playRoom(CustomPlayer)` as abstract, because every concrete room must decide what happens when the player enters it.
+
+- `StandardRoom` implements the normal exploration behavior by calling the shared room command loop.
+- `MonsterRoom` implements the monster encounter and then returns to normal room interaction.
+- `SleepRoom` implements the sleep action as well as the normal room commands.
+
+`GameVersionFinal` stores these different room objects in a `Room[]`. Calling `playRoom(player)` therefore uses polymorphism to run the behavior of the actual room object.
+
+### Interface: `Consumable`
+
+`Consumable` defines the common contract for an inventory item that can be consumed by a `CustomPlayer`. `HealthItem` implements this interface and applies its healing effect through `consume(player)`. `CustomPlayer` uses the interface instead of depending directly on the implementation when applying an item's effect. This allows another consumable type to implement the same contract later.
+
 🧰 Technologies Used
 
     Java 17 (or specify version)
 
-    Swing GUI
+    Command Line Interface (CLI)
 
     OOP Principles (Encapsulation, Inheritance via CustomPlayer, etc.)
 
@@ -159,3 +162,40 @@ Room Interaction: Each room contains:
     🧙 NPC interactions with dialogue options
 
     📜 Quest system with objectives
+
+
+
+## Graphical User Interface (GUI)
+
+The project includes a Java Swing interface. It uses the same room map, player, inventory, health items, attacks, and monster-battle rules as the console game. The console version remains available.
+
+### Run the GUI
+
+Open a terminal in the `Text-Based-RPG` source folder and run:
+
+```bash
+javac -Xlint:all *.java
+java GameGUI
+```
+
+### Run the console version
+
+```bash
+javac -Xlint:all *.java
+java GameVersionFinal
+```
+
+### GUI controls
+
+- Use the directional buttons to move through available exits.
+- Select an object and click **Pick up selected** to collect it.
+- Select an inventory item and click **Drop selected** to leave it in the current room.
+- Use **Use health item** to consume food or a potion outside combat.
+- In the Sleep Room, click **Rest** to restore one health point.
+- In the Monster Room, choose one of the attack buttons or use a health item during your turn. Movement is locked until the monster is defeated.
+- Use **Restart game** to begin a fresh run.
+
+The GUI uses only Java's built-in Swing library; no external dependency is required.
+
+### Button readability
+Navigation arrows and attack choices use a consistent high-contrast button style. Unavailable directions remain readable but appear muted; navigation is still blocked when a direction is unavailable or while combat is active.

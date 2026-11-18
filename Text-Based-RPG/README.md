@@ -120,7 +120,7 @@ Room Interaction: Each room contains:
 
 🖼️ Screenshots / Visuals
 
-![tbrpgbanner](https://github.com/user-attachments/assets/ef1bbb4b-4881-48a2-8718-3f0f0645c5c5)
+![Game Execution GUI Screenshot](Exectuion_output.png)
 
 ## Object-Oriented Design
 
