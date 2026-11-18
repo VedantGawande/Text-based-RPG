@@ -120,7 +120,7 @@ Room Interaction: Each room contains:
 
 🖼️ Screenshots / Visuals
 
-![Game Execution GUI Screenshot](Exectuion_output.png)
+![Game Execution GUI Screenshot](Text-Based-RPG/Exectuion_output.png)
 
 ## Object-Oriented Design
 
